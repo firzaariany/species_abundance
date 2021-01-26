@@ -1,0 +1,68 @@
+---
+title: "Modeling the presence/absence of species"
+author: "Firza Riany"
+date: "26/01/2021"
+output: html_document
+---
+
+## Description
+
+The project is aimed to understand the occurrences of tree species under
+different temperature range. 
+
+The information collected from this project can be useful to understand the
+*distribution of tree species along elevational gradient* such as in mountain
+forests. This is because elevational gradient is followed by temperature
+gradient. 
+
+Different temperatures along elevational gradient affect the distribution of
+tree species because they require different temperature range to live optimally. 
+
+## Disclaimer
+
+This was a part of school project. Datasets were provided by my teacher from
+AgroParisTech & Université de Lorraine, [Dr. Paulina Pinto](http://siafee.agroparistech.fr/pinto-paulina). I wrote the scripts under
+her guidance. 
+
+## Datasets
+
+ecoflo dataset extracted from:  
+
+* [Ecoplant](https://silvae.agroparistech.fr/home/?page_id=173), a database for soil and floristic data  
+* Sophy  
+
+Within the ecoflo dataset, there are:
+
+* Floristic data that contains the presence/absence (1/0) of three tree species    
+* Ecological data that contains:  
+    + The elevation (alt)  
+    + Optimal pH (VI pH)  
+    + Soil condition (VI C/N)  
+    + Average temperature in January (mt1), in July (mt7), and annual (mt13)  
+    + Climatic water balance in July (bh7)  
+
+```{r import file}
+ecoflo = read.table("ecoflo.csv", header = TRUE, sep = ";")
+```
+
+Some remarks about the variables in the dataset:  
+
+* Placette        : identifier for each tree observations 
+* Periode         : if the observation is from old or new records    
+* Massif          : the name of the mountains where the (tree) records were taken  
+* xLamb and yLamb : geo-position of the records  
+* Annee           : the year the records were taken  
+* Alt             : the latitude of the records  
+* VIpH            : the optimal pH for the tree species  
+* VICN            : the optimal soil condition for the tree species (CN means Carbon-Nitrogen ratio, it shows the amount of mineral contained in the soil. These are the organic materials that all tree species need to have)  
+* Tree species    : there are three species in this dataset  
+    + *Abies alba* (fir)  
+    + *Larix decidua* (larch)  
+    + *Quercus robur* (pedunculate oak)  
+    + *Carpinus betulus* (Hornbeam)  
+    + *Vaccinium myrtillus* (berry bush)  
+* mt1             : average temperature in January  
+* mt7             : average temperature in July  
+* mt13            : annual average temperature  
+* bh7             : climatic water balance in July  
+
