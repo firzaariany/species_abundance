@@ -5,6 +5,15 @@ date: "26/01/2021"
 output: html_document
 ---
 
+## To-do list
+
+* Divide training and validation dataset
+* Train the model based on test and validation dataset
+* Create predicted Y values for training based on test and validation dataset
+* Evaluate model performance (RMSE between predicted vs observed for both test and validation dataset)
+* Check the assumption for logistic regression
+* In-depth EDA
+
 ## Description
 
 The project is aimed to understand the occurrences of tree species under
