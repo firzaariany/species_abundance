@@ -50,7 +50,7 @@ Some remarks about the variables in the dataset:
 * Placette        : identifier for each tree observations 
 * Periode         : if the observation is from old or new records    
 * Massif          : the name of the mountains where the (tree) records were taken  
-* xLamb and yLamb : geo-position of the records  
+* xLamb and yLamb : geo-position of the plots where the records were taken   
 * Annee           : the year the records were taken  
 * Alt             : the latitude of the records  
 * VIpH            : the optimal pH for the tree species  
@@ -66,3 +66,258 @@ Some remarks about the variables in the dataset:
 * mt13            : annual average temperature  
 * bh7             : climatic water balance in July  
 
+## Exploratory Data Analysis (EDA)
+```{r plot, fig.height=8, fig.width=10, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(dplyr)
+library(hrbrthemes)
+library(ggpubr)
+
+# Abies presence
+abies = ecoflo %>%
+  filter(Abies_alba == 1)
+
+abies_pres = ggplot(data = ecoflo, aes(x = xLamb2, y = yLamb2)) +
+  geom_point(shape = 1, alpha = 0.4, size = 1.5, color = "gray70") +
+  geom_point(data = abies, aes(x = xLamb2, y = yLamb2),
+             color = "indianred3", size = 1.5, alpha = 0.4,
+             shape = 1) +
+  labs(subtitle = "Abies alba presence") +
+  xlab("Coordinate X") + ylab("Coordinate Y") +
+  theme_ipsum(base_size = 7)
+
+# Carpinus presence
+carpinus = ecoflo %>%
+  filter(Carpinus_betulus == 1)
+
+carp_pres = ggplot(data = ecoflo, aes(x = xLamb2, y = yLamb2)) +
+  geom_point(shape = 1, alpha = 0.4, size = 1.5, color = "gray70") +
+  geom_point(data = carpinus, aes(x = xLamb2, y = yLamb2),
+             color = "cyan4", size = 1.5, alpha = 0.4,
+             shape = 1) +
+  labs(subtitle = "Carpinus betulus presence") +
+  xlab("Coordinate X") + ylab("Coordinate Y") +
+  theme_ipsum(base_size = 7)
+
+# Larix presence
+larix = ecoflo %>% 
+  filter(Larix_decidua == 1)
+
+larix_pres = ggplot(data = ecoflo, aes(x = xLamb2, y = yLamb2)) +
+  geom_point(shape = 1, alpha = 0.4, size = 1.5, color = "gray70") +
+  geom_point(data = larix, aes(x = xLamb2, y = yLamb2),
+             color = "dark orange2", size = 1.5, alpha = 0.4,
+             shape = 1) +
+  labs(subtitle = "Larix decidua presence") +
+  xlab("Coordinate X") + ylab("Coordinate Y") +
+  theme_ipsum(base_size = 7)
+
+# Vacciniul presence
+vacc = ecoflo %>%
+  filter(Vaccinium_myrtillus == 1)
+
+vacc_pres = ggplot(data = ecoflo, aes(x = xLamb2, y = yLamb2)) +
+  geom_point(shape = 1, alpha = 0.4, size = 1.5, color = "gray70") +
+  geom_point(data = vacc, aes(x = xLamb2, y = yLamb2),
+             color = "darkviolet", size = 1.5, alpha = 0.4,
+             shape = 1) +
+  labs(subtitle = "Vaccinium myrtillus presence") +
+  xlab("Coordinate X") + ylab("Coordinate Y") +
+  theme_ipsum(base_size = 7)
+
+presence = ggarrange(abies_pres, carp_pres, larix_pres, vacc_pres)
+
+presence
+```
+
+```{r summary}
+ecoflo$mt13[is.na(ecoflo$mt13)] = 9.5
+summary(ecoflo)
+ecoflo$massif = as.factor(ecoflo$massif)
+ecoflo$periode = as.factor(ecoflo$periode)
+ecoflo$annee = as.factor(ecoflo$annee)
+```
+
+So, my research question is: "How is the presence of tree species affected by
+temperature gradient?"
+
+There is a theory that temperature is changing alongside altitudinal gradient. So,
+if we know the altitude of a tree species, we can use the altitude as the position of
+the tree and relate it with temperature. We can see how temperature can affect the
+presence of trees along altitudinal gradient.
+
+```{r altitude hist, message=FALSE, warning=FALSE}
+# Temperature distribution
+hist_alt = ggplot(data = ecoflo, aes(x = mt13)) +
+  geom_histogram(bins = 20, fill = "cyan4", color = "gray92", alpha = 0.8) +
+  geom_vline(aes(xintercept = mean(mt13), color = "Mean"), size = 1) +
+  geom_vline(aes(xintercept = median(mt13), color = "Median"), size = 1) +
+  scale_color_manual(name = "Statistics", values = c("Mean" = "red", 
+                                                     "Median" = "orange")) +
+  labs(title = "Temperature distribution") +
+  xlab("Temperature (°Celcius)") +
+  ylab("Counts") +
+  theme_ipsum(plot_title_size = 10)
+
+hist_alt
+```
+
+```{r species presence per temperature, message=FALSE, warning=FALSE}
+# Temperature distribution for the presence of Abies alba
+abies_temp = ggplot(data = abies, aes(x = mt13)) +
+  geom_histogram(bins = 20, fill = "indianred3", color = "gray92", alpha = 0.8) +
+  geom_vline(aes(xintercept = mean(mt13), color = "Mean"), size = 1) +
+  geom_vline(aes(xintercept = median(mt13), color = "Median"), size = 1) +
+  scale_color_manual(name = "Statistics", values = c("Mean" = "red", 
+                                                     "Median" = "orange")) +
+  labs(title = "Temperature distribution for Abies alba") +
+  xlab("Temperature (°Celcius)") +
+  ylab("Counts") +
+  xlim(0, 20) +
+  ylim(0, 1000) +
+  theme_ipsum(plot_title_size = 10, plot_title_margin = 4) +
+  theme(legend.position = "none")
+
+# Temperature distribution for the presence of Carpinus betulus
+carp_temp = ggplot(data = carpinus, aes(x = mt13)) +
+  geom_histogram(bins = 20, fill = "cyan4", color = "gray92", alpha = 0.8) +
+  geom_vline(aes(xintercept = mean(mt13), color = "Mean"), size = 1) +
+  geom_vline(aes(xintercept = median(mt13), color = "Median"), size = 1) +
+  scale_color_manual(name = "Statistics", values = c("Mean" = "red", 
+                                                     "Median" = "orange")) +
+  labs(title = "Carpinus betulus") +
+  xlab("Temperature (°Celcius)") +
+  ylab("Counts") +
+  xlim(0, 20) +
+  ylim(0, 1000) +
+  theme_ipsum(plot_title_size = 10, plot_title_margin = 4)
+
+# Temperature distribution for the presence of Larix decidua
+larix_temp = ggplot(data = larix, aes(x = mt13)) +
+  geom_histogram(bins = 20, fill = "dark orange2", color = "gray92", alpha = 0.8) +
+  geom_vline(aes(xintercept = mean(mt13), color = "Mean"), size = 1) +
+  geom_vline(aes(xintercept = median(mt13), color = "Median"), size = 1) +
+  scale_color_manual(name = "Statistics", values = c("Mean" = "red", 
+                                                     "Median" = "orange")) +
+  labs(title = "Larix decidua") +
+  xlab("Temperature (°Celcius)") +
+  ylab("Counts") +
+  xlim(0, 20) +
+  ylim(0, 1000) +
+  theme_ipsum(plot_title_size = 10, plot_title_margin = 4) +
+  theme(legend.position = "none")
+
+# Temperature distribution for the presence of Vaccinium myrtillus
+vacc_temp = ggplot(data = vacc, aes(x = mt13)) +
+  geom_histogram(bins = 20, fill = "darkviolet", color = "gray92", alpha = 0.8) +
+  geom_vline(aes(xintercept = mean(mt13), color = "Mean"), size = 1) +
+  geom_vline(aes(xintercept = median(mt13), color = "Median"), size = 1) +
+  scale_color_manual(name = "Statistics", values = c("Mean" = "red", 
+                                                     "Median" = "orange")) +
+  labs(title = "Vaccinium myrtillus") +
+  xlab("Temperature (°Celcius)") +
+  ylab("Counts") +
+  xlim(0, 20) +
+  ylim(0, 1000) +
+  theme_ipsum(plot_title_size = 10, plot_title_margin = 4)
+
+temp_dist = ggarrange(abies_temp, carp_temp, larix_temp, vacc_temp)
+
+temp_dist
+```
+
+But, how is the relationship between altitude and temperature? Are they really
+negatively or positively related? To know this, we should run a simple linear
+model.
+
+```{r linear alt x temp, message=FALSE, warning=FALSE}
+# Relationship between altitude and mean annual temperature
+lm_temp = lm(ecoflo$mt13 ~ ecoflo$alt)
+
+summary(lm_temp) # an increase in alt leads to a decrease in temperature
+
+temp_plot = ggplot(data = ecoflo, aes(x = alt, y = mt13)) +
+  geom_point(shape = 1, size = 1.5, color = "violetred4", alpha = 0.4) +
+  geom_smooth(method = "lm", na.rm = TRUE, color = "dodgerblue3", alpha = 0.5,
+              lwd = 1) +
+  labs(title = "Relationship between temperature and altitude") +
+  xlab("Altitude (meter above sea level)") +
+  ylab("Mean annual temperature (°Celcius)") +
+  theme_ipsum(plot_title_size = 12, base_size = 10, plot_title_margin = 4)
+```
+
+Relationship between altitude and temperature is negative relationship. It means 
+an increase in altitude will cause a decrease in temperature. It also means that
+both variables are related, so we can either use temperature or altitude to predict
+the presence of a tree species. 
+
+In this project I will see the ecological profile of Abies alba using temperature. 
+
+```{r logit, message=FALSE, warning=FALSE}
+# Presence of Abies alba as a function of temperature
+abies_glm = glm(ecoflo$Abies_alba ~ ecoflo$mt13, family = binomial)
+
+summary(abies_glm)
+# 9565.3 - 8708.3, deviation = 857 --> the variance explained by temperature
+
+# The significance of the model with temperature
+anova(abies_glm, test="Chisq") # temperature can explain the presence of abies alba
+
+# Predicted values = abies_temp$fitted.values
+
+# Storing the fitted values from abies_temp in a dataset
+predicted = data.frame(fitted(abies_glm))
+
+names(predicted)[1] = "Abies_alba"
+
+# Presence of Carpinus betulus as a function of temperature
+carp_glm = glm(ecoflo$Carpinus_betulus ~ ecoflo$mt13, family = binomial)
+
+summary(carp_glm)
+# 4461.0 - 4457.9 
+
+anova(carp_glm, test="Chisq") # temperature is not significant
+
+# Presence of Larix decidua
+larix_glm = glm(ecoflo$Larix_decidua ~ ecoflo$mt13, family = binomial)
+
+summary(larix_glm)
+# 3565.8 - 2557.8, deviance = 1008 --> variance explained by temperature
+
+anova(larix_glm, test="Chisq") # temperature has a significant effect on the presence
+
+predicted$Larix_decidua = fitted(larix_glm)
+
+# Presence of Vaccinium
+vacc_glm = glm(ecoflo$Vaccinium_myrtillus ~ ecoflo$mt13, family = binomial)
+
+summary(vacc_glm)
+# 7988.7  - 6773.3, deviance = 1200 --> variance explained by temperature
+
+anova(vacc_glm, test="Chisq") # temperature has a significant effect
+
+predicted$Vaccinium_myrtillus = fitted(vacc_glm)
+
+library(tidyr)
+
+predicted_long = gather(data = predicted, key = species, value = glm_predict,
+                        Abies_alba:Vaccinium_myrtillus, factor_key = TRUE)
+
+# temperature repeated 3 times, 1 - 7695
+predicted_long$temp = rep(ecoflo$mt13, times = 3)
+
+summary(predicted_long$species)
+
+fit_2 = ggplot(data = predicted_long, 
+               aes(x = temp, y = glm_predict, color = species)) +
+  geom_point(aes(color = species),
+             alpha = 0.7, size = 1.5) +
+  labs(title = "Probability of tree presence across temperature gradients") +
+  xlab("Temperature (°Celcius)") +
+  ylab("Predicted probabilities") +
+  scale_color_manual(name = "Species",
+                     values = c("Abies_alba" = "indianred3",
+                                "Larix_decidua" = "dark orange2",
+                                "Vaccinium_myrtillus" = "darkviolet")) +
+  theme_ipsum(plot_title_size = 12, plot_title_margin = 4)
+```
